@@ -1,10 +1,10 @@
 Tiny app to add several actions to volume buttons.
 
 Actions:
-* Volume Up   long - next track
-* Volume Down long - previous track
+* Long Volume Up   - next track
+* Long Volume Down - previous track
 
-Does NOT work when the screen is fully off. For the better user experience use Key Mapper.
+Does NOT work when the screen is fully off. For a better user experience use Key Mapper.
 
 It is Free Open Source Software.
 License: GPL-3

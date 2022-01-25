@@ -1,6 +1,6 @@
 # Volta
 
-Volume button actions.
+Additional actions on volume buttons.
 
 [comment]: <> ([<img)
 
@@ -26,10 +26,10 @@ Volume button actions.
 Tiny app to add several actions to volume buttons.
 
 Actions:
-- Volume Up   long - next track
-- Volume Down long - previous track
+- Long Volume Up   - next track
+- Long Volume Down - previous track
 
-Does NOT work when the screen is fully off. For the better user experience use 
+Does NOT work when the screen is fully off. For a better user experience use 
 [Key Mapper](https://github.com/sds100/KeyMapper).
 
 ## Permissions
