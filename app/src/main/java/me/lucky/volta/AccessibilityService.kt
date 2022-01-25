@@ -75,7 +75,8 @@ class AccessibilityService : AccessibilityService() {
     override fun onKeyEvent(event: KeyEvent?): Boolean {
         if (event == null
             || !prefs.isServiceEnabled
-            || audioManager?.isMusicActive != true) return false
+            || audioManager?.isMusicActive != true
+            || audioManager?.mode != AudioManager.MODE_NORMAL) return false
         when (event.keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN -> return previousTrack(event)
             KeyEvent.KEYCODE_VOLUME_UP -> return nextTrack(event)
