@@ -2,13 +2,10 @@
 
 Additional actions on volume buttons.
 
-[comment]: <> ([<img)
-
-[comment]: <> (     src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png")
-
-[comment]: <> (     alt="Get it on F-Droid")
-
-[comment]: <> (     height="80">]&#40;https://f-droid.org/packages/me.lucky.volta/&#41;)
+[<img
+     src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/me.lucky.volta/)
 
 [comment]: <> ([<img )
 
@@ -26,17 +23,18 @@ Additional actions on volume buttons.
 Tiny app to add several actions to volume buttons.
 
 Actions:
-- Long Volume Up   - next track
-- Long Volume Down - previous track
+- Long   Volume Up   - next track
+- Long   Volume Down - previous track
+- Double Volume Up   - flashlight
 
 Does NOT work when the screen is fully off. For a better user experience use 
 [Key Mapper](https://github.com/sds100/KeyMapper).
 
 ## Permissions
 
-`ACCESSIBILITY` get volume key events
-
-`VIBRATE` notify on action success
+- Accessibility - get volume key events
+- Vibrate       - notify on action success
+- Flashlight    - toggle flashlight
 
 ## License
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)

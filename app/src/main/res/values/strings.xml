@@ -4,4 +4,6 @@
     <string name="description">The app will add several actions to volume buttons. You have to grant accessibility permission.</string>
     <string name="accessibility_service_description">The service is used to get volume key events.</string>
     <string name="service_unavailable_popup">Accessibility service unavailable</string>
+    <string name="flashlight">Flashlight</string>
+    <string name="flashlight_description">Double press Volume Up</string>
 </resources>
