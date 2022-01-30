@@ -8,9 +8,9 @@ Actions:
 Does NOT work when the screen is fully off. For a better user experience use Key Mapper.
 
 Permissions:
-* Accessibility - get volume key events
-* Vibrate       - notify on action success
-* Flashlight    - toggle flashlight
+* ACCESSIBILITY - get volume key events
+* VIBRATE       - notify on action success
+* FLASHLIGHT    - toggle flashlight
 
 It is Free Open Source Software.
 License: GPL-3
