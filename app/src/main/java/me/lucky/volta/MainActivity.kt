@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         if (prefs.isServiceEnabled && !hasPermissions())
             Snackbar.make(
                 binding.toggle,
-                getString(R.string.service_unavailable_popup),
+                R.string.service_unavailable_popup,
                 Snackbar.LENGTH_SHORT,
             ).show()
     }
