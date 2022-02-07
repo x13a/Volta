@@ -2,8 +2,13 @@
 <resources>
     <string name="app_name">Volta</string>
     <string name="description">Приложение добавит несколько действий на кнопки регулировки громкости. Вы должны выдать разрешение на использование службы доступности.</string>
-    <string name="accessibility_service_description">Сервис используется, чтобы получать события кнопок громкости.</string>
     <string name="service_unavailable_popup">Сервис службы доступности недоступен</string>
     <string name="flashlight">Фонарик</string>
     <string name="flashlight_description">Двойное нажатие Громкость Вверх</string>
+    <string name="flashlight_flag_array_music">Пока музыка играет</string>
+    <string name="flashlight_flag_array_call">Во время звонка</string>
+    <string name="prominent_disclosure_title">Раскрытие Информации</string>
+    <string name="prominent_disclosure_message">Приложение использует сервис службы доступности, чтобы получать события нажатий кнопок громкости. Используя их, оно добавит возможность переключать треки при помощи долгого нажатия на кнопки громкости.</string>
+    <string name="accept">Принять</string>
+    <string name="exit">Выйти</string>
 </resources>

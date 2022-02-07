@@ -6,14 +6,10 @@ Additional actions on volume buttons.
      src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/me.lucky.volta/)
-
-[comment]: <> ([<img )
-
-[comment]: <> (      src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" )
-
-[comment]: <> (      alt="Get it on Google Play" )
-
-[comment]: <> (      height="80">]&#40;https://play.google.com/store/apps/details?id=me.lucky.volta&#41;)
+[<img
+      src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+      alt="Get it on Google Play"
+      height="80">](https://play.google.com/store/apps/details?id=me.lucky.volta)
 
 <img 
      src="https://raw.githubusercontent.com/x13a/Volta/main/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" 
@@ -32,7 +28,7 @@ Does NOT work when the screen is fully off. For a better user experience use
 
 ## Permissions
 
-* ACCESSIBILITY - get volume key events
+* ACCESSIBILITY - receive volume key events
 * VIBRATE       - notify on action success
 * FLASHLIGHT    - toggle flashlight
 

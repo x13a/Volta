@@ -32,13 +32,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <CheckBox
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/flashlight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layoutDirection="rtl"
-                android:text="@string/flashlight"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:text="@string/flashlight" />
 
             <TextView
                 android:id="@+id/flashlightDescription"
@@ -46,6 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/flashlight_description"
                 android:textSize="12sp" />
+
         </LinearLayout>
     </ScrollView>
 

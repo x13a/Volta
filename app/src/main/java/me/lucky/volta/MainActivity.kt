@@ -9,10 +9,10 @@ import android.provider.Settings
 import android.view.View
 import android.view.accessibility.AccessibilityManager
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 
 import me.lucky.volta.databinding.ActivityMainBinding
-import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         init()
         setup()
+        if (prefs.isShowProminentDisclosure) showProminentDisclosure()
     }
 
     private fun init() {
@@ -54,12 +55,49 @@ class MainActivity : AppCompatActivity() {
             flashlight.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isFlashlightChecked = isChecked
             }
+            flashlight.setOnLongClickListener {
+                showFlashlightSettings()
+                true
+            }
             toggle.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isServiceEnabled = isChecked
                 if (isChecked && !hasPermissions())
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }
         }
+    }
+
+    private fun showProminentDisclosure() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.prominent_disclosure_title)
+            .setMessage(R.string.prominent_disclosure_message)
+            .setPositiveButton(R.string.accept) { _, _ ->
+                prefs.isShowProminentDisclosure = false
+            }
+            .setNegativeButton(R.string.exit) { _, _ ->
+                finishAndRemoveTask()
+            }
+            .show()
+    }
+
+    private fun showFlashlightSettings() {
+        var flag = prefs.flashlightFlag
+        val values = FlashlightFlag.values()
+        MaterialAlertDialogBuilder(this)
+            .setMultiChoiceItems(
+                resources.getStringArray(R.array.flashlight_flag),
+                values.map { flag.and(it.value) != 0 }.toBooleanArray()
+            ) { _, index, isChecked ->
+                val value = values[index]
+                flag = when (isChecked) {
+                    true -> flag.or(value.value)
+                    false -> flag.and(value.value.inv())
+                }
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                prefs.flashlightFlag = flag
+            }
+            .show()
     }
 
     private fun hideFlashlight() {

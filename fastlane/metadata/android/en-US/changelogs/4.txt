@@ -1,0 +1,1 @@
+flashlight subsettings, now it is by default disabled while music is playing and when on a call

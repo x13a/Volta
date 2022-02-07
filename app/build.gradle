@@ -4,14 +4,14 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 32
 
     defaultConfig {
         applicationId "me.lucky.volta"
         minSdk 23
-        targetSdk 31
-        versionCode 3
-        versionName "1.0.2"
+        targetSdk 32
+        versionCode 4
+        versionName "1.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="flashlight_flag">
+        <item>@string/flashlight_flag_array_music</item>
+        <item>@string/flashlight_flag_array_call</item>
+    </string-array>
+</resources>

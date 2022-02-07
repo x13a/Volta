@@ -14,7 +14,6 @@ import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import java.lang.Exception
 import java.lang.ref.WeakReference
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -59,6 +58,7 @@ class AccessibilityService : AccessibilityService() {
     private fun deinit() {
         longDownTask?.cancel()
         longUpTask?.cancel()
+        doubleUpTask?.cancel()
         cameraManager?.unregisterTorchCallback(torchCallback)
         sensorManager?.unregisterListener(proximityListener)
     }
@@ -105,8 +105,19 @@ class AccessibilityService : AccessibilityService() {
     override fun onKeyEvent(event: KeyEvent?): Boolean {
         if (event == null || !prefs.isServiceEnabled) return false
         var result = super.onKeyEvent(event)
-        val isFlashlight = prefs.isFlashlightChecked
-        if (audioManager?.isMusicActive == true && audioManager?.mode == AudioManager.MODE_NORMAL)
+        val isMusicActive = audioManager?.isMusicActive == true
+        val isAudioModeNormal = audioManager?.mode == AudioManager.MODE_NORMAL
+        var isFlashlight = prefs.isFlashlightChecked
+        if (isFlashlight) {
+            val flag = prefs.flashlightFlag
+            if (flag.and(FlashlightFlag.MUSIC.value) == 0) {
+                isFlashlight = isFlashlight && !isMusicActive
+            }
+            if (flag.and(FlashlightFlag.CALL.value) == 0) {
+                isFlashlight = isFlashlight && isAudioModeNormal
+            }
+        }
+        if (isMusicActive && isAudioModeNormal)
             when (event.keyCode) {
                 KeyEvent.KEYCODE_VOLUME_DOWN -> result = previousTrack(event)
                 KeyEvent.KEYCODE_VOLUME_UP -> result = nextTrack(event, isFlashlight)
