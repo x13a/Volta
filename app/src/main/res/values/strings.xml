@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Volta</string>
-    <string name="description">The app will add several actions to volume buttons. You have to grant accessibility permission.</string>
+    <string name="description">The app can add several actions to volume buttons. You have to grant accessibility permission.</string>
     <string name="service_unavailable_popup">Accessibility service unavailable</string>
+    <string name="track">Track</string>
+    <string name="track_description">Long press Volume Up/Down</string>
     <string name="flashlight">Flashlight</string>
     <string name="flashlight_description">Double press Volume Up</string>
-    <string name="flashlight_flag_array_music">Music</string>
-    <string name="flashlight_flag_array_call">Call</string>
     <string name="prominent_disclosure_title">Prominent Disclosure</string>
-    <string name="prominent_disclosure_message">The app uses accessibility service to receive volume key events. Using these the app will add volume button long press actions to change next/previous playing track.</string>
+    <string name="prominent_disclosure_message">The app uses accessibility service to receive volume key events. Using these the app can add actions to change next/previous playing track and/or toggle flashlight.</string>
     <string name="accept">Accept</string>
     <string name="exit">Exit</string>
 </resources>

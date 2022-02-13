@@ -2,10 +2,6 @@ package me.lucky.volta
 
 import android.Manifest
 import android.accessibilityservice.AccessibilityService
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
@@ -28,11 +24,9 @@ class AccessibilityService : AccessibilityService() {
     }
 
     private lateinit var prefs: Preferences
-    private lateinit var proximityListener: ProximityListener
+    private lateinit var torchCallback: TorchCallback
     private var audioManager: AudioManager? = null
     private var cameraManager: CameraManager? = null
-    private var sensorManager: SensorManager? = null
-    private var proximitySensor: Sensor? = null
     private var vibrator: Vibrator? = null
     @RequiresApi(Build.VERSION_CODES.O)
     private var vibrationEffect: VibrationEffect? = null
@@ -43,7 +37,6 @@ class AccessibilityService : AccessibilityService() {
     private val longUpFlag = AtomicBoolean()
     private val doubleUpFlag = AtomicBoolean()
     private val upTime = AtomicLong()
-    private val torchCallback = TorchCallback()
 
     override fun onCreate() {
         super.onCreate()
@@ -60,16 +53,14 @@ class AccessibilityService : AccessibilityService() {
         longUpTask?.cancel()
         doubleUpTask?.cancel()
         cameraManager?.unregisterTorchCallback(torchCallback)
-        sensorManager?.unregisterListener(proximityListener)
+        torchCallback.disableFlashlightTask?.cancel()
     }
 
     private fun init() {
         prefs = Preferences(this)
-        proximityListener = ProximityListener(WeakReference(this))
+        torchCallback = TorchCallback(WeakReference(this))
         audioManager = getSystemService(AudioManager::class.java)
         cameraManager = getSystemService(CameraManager::class.java)
-        sensorManager = getSystemService(SensorManager::class.java)
-        proximitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             getSystemService(VibratorManager::class.java)?.defaultVibrator
         } else {
@@ -85,7 +76,6 @@ class AccessibilityService : AccessibilityService() {
             cameraManager?.registerTorchCallback(torchCallback, null)
         } catch (exc: IllegalArgumentException) {
             cameraManager = null
-            sensorManager = null
         }
     }
 
@@ -103,28 +93,20 @@ class AccessibilityService : AccessibilityService() {
     override fun onInterrupt() {}
 
     override fun onKeyEvent(event: KeyEvent?): Boolean {
-        if (event == null || !prefs.isServiceEnabled) return false
-        var result = super.onKeyEvent(event)
+        if (event == null ||
+            !prefs.isServiceEnabled ||
+            audioManager?.mode != AudioManager.MODE_NORMAL) return false
         val isMusicActive = audioManager?.isMusicActive == true
-        val isAudioModeNormal = audioManager?.mode == AudioManager.MODE_NORMAL
-        var isFlashlight = prefs.isFlashlightChecked
-        if (isFlashlight) {
-            val flag = prefs.flashlightFlag
-            if (flag.and(FlashlightFlag.MUSIC.value) == 0) {
-                isFlashlight = isFlashlight && !isMusicActive
-            }
-            if (flag.and(FlashlightFlag.CALL.value) == 0) {
-                isFlashlight = isFlashlight && isAudioModeNormal
-            }
-        }
-        if (isMusicActive && isAudioModeNormal)
+        if (prefs.isTrackChecked && isMusicActive)
             when (event.keyCode) {
-                KeyEvent.KEYCODE_VOLUME_DOWN -> result = previousTrack(event)
-                KeyEvent.KEYCODE_VOLUME_UP -> result = nextTrack(event, isFlashlight)
+                KeyEvent.KEYCODE_VOLUME_DOWN -> return previousTrack(event)
+                KeyEvent.KEYCODE_VOLUME_UP -> return nextTrack(event)
             }
-        if (isFlashlight && event.keyCode == KeyEvent.KEYCODE_VOLUME_UP)
-            result = flashlight(event)
-        return result
+        else if (
+            prefs.isFlashlightChecked &&
+            !isMusicActive &&
+            event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) return flashlight(event)
+        return super.onKeyEvent(event)
     }
 
     private fun previousTrack(event: KeyEvent): Boolean {
@@ -175,7 +157,7 @@ class AccessibilityService : AccessibilityService() {
         ))
     }
 
-    private fun nextTrack(event: KeyEvent, isFlashlight: Boolean): Boolean {
+    private fun nextTrack(event: KeyEvent): Boolean {
         when (event.action) {
             KeyEvent.ACTION_DOWN -> {
                 longUpTask?.cancel()
@@ -189,7 +171,7 @@ class AccessibilityService : AccessibilityService() {
             }
             KeyEvent.ACTION_UP -> {
                 longUpTask?.cancel()
-                if (!isFlashlight && !longUpFlag.getAndSet(false)) volumeUp()
+                if (!longUpFlag.getAndSet(false)) volumeUp()
                 return true
             }
         }
@@ -202,23 +184,13 @@ class AccessibilityService : AccessibilityService() {
                 if (event.eventTime - upTime.getAndSet(event.eventTime) < DOUBLE_PRESS_DURATION) {
                     doubleUpTask?.cancel()
                     doubleUpFlag.set(true)
-                    if (sensorManager != null && proximitySensor != null) {
-                        sensorManager?.registerListener(
-                            proximityListener,
-                            proximitySensor,
-                            SensorManager.SENSOR_DELAY_FASTEST,
-                        )
-                    } else {
-                        toggleFlashlight()
-                        vibrate()
-                    }
+                    toggleFlashlight()
+                    vibrate()
                 }
                 return true
             }
             KeyEvent.ACTION_UP -> {
-                if (!longUpFlag.getAndSet(false) &&
-                    !doubleUpFlag.getAndSet(false))
-                {
+                if (!doubleUpFlag.getAndSet(false)) {
                     doubleUpTask?.cancel()
                     doubleUpTask = Timer()
                     doubleUpTask?.schedule(timerTask { volumeUp() }, DOUBLE_PRESS_DURATION)
@@ -229,9 +201,14 @@ class AccessibilityService : AccessibilityService() {
         return false
     }
 
-    @RequiresPermission("android.permission.FLASHLIGHT")
     private fun toggleFlashlight() {
         val state = !torchCallback.state.get()
+        torchCallback.internalState.set(state)
+        if (!setTorchMode(state)) torchCallback.internalState.set(false)
+    }
+
+    @RequiresPermission("android.permission.FLASHLIGHT")
+    private fun setTorchMode(value: Boolean): Boolean {
         try {
             cameraManager?.setTorchMode(
                 cameraManager
@@ -240,43 +217,34 @@ class AccessibilityService : AccessibilityService() {
                         cameraManager
                             ?.getCameraCharacteristics(it)
                             ?.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ?: false
-                    } ?: return,
-                state,
+                    } ?: return false,
+                value,
             )
-
-        } catch (exc: Exception) { return }
-        torchCallback.state.set(state)
+        } catch (exc: Exception) { return false }
+        return true
     }
 
-    private class TorchCallback: CameraManager.TorchCallback() {
+    private class TorchCallback(
+        private val service: WeakReference<me.lucky.volta.AccessibilityService>,
+    ) : CameraManager.TorchCallback() {
+        companion object {
+            private const val DISABLE_FLASHLIGHT_DELAY = 15 * 60 * 1000L
+        }
+
         val state = AtomicBoolean()
+        val internalState = AtomicBoolean()
+        var disableFlashlightTask: Timer? = null
 
         override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
             super.onTorchModeChanged(cameraId, enabled)
+            disableFlashlightTask?.cancel()
             state.set(enabled)
-        }
-    }
-
-    private class ProximityListener(
-        private val service: WeakReference<me.lucky.volta.AccessibilityService>,
-    ) : SensorEventListener {
-        companion object {
-            private const val SENSITIVITY = 4
-        }
-
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event == null || event.sensor.type != Sensor.TYPE_PROXIMITY) return
-            val service = service.get() ?: return
-            val value = event.values.getOrNull(0)
-            if (value == null || value < -SENSITIVITY || value > SENSITIVITY) {
-                service.toggleFlashlight()
-                service.vibrate()
-            } else {
-                service.volumeUp()
+            if (internalState.getAndSet(false) && enabled) {
+                disableFlashlightTask = Timer()
+                disableFlashlightTask?.schedule(timerTask {
+                    service.get()?.setTorchMode(false)
+                }, DISABLE_FLASHLIGHT_DELAY)
             }
-            service.sensorManager?.unregisterListener(service.proximityListener)
         }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 }

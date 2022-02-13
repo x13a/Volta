@@ -33,6 +33,20 @@
             android:orientation="vertical">
 
             <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/track"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="@string/track" />
+
+            <TextView
+                android:id="@+id/description2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/track_description"
+                android:textSize="12sp" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/flashlight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

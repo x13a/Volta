@@ -1,0 +1,3 @@
+change track switch
+remove flashlight subsettings
+auto-disable flashlight after 15m

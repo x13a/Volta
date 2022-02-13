@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         cameraManager = getSystemService(CameraManager::class.java)
         if (!hasFlashlight()) hideFlashlight()
         binding.apply {
+            track.isChecked = prefs.isTrackChecked
             flashlight.isChecked = prefs.isFlashlightChecked
             toggle.isChecked = prefs.isServiceEnabled
         }
@@ -52,12 +53,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setup() {
         binding.apply {
+            track.setOnCheckedChangeListener { _, isChecked ->
+                prefs.isTrackChecked = isChecked
+            }
             flashlight.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isFlashlightChecked = isChecked
-            }
-            flashlight.setOnLongClickListener {
-                showFlashlightSettings()
-                true
             }
             toggle.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isServiceEnabled = isChecked
@@ -76,26 +76,6 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton(R.string.exit) { _, _ ->
                 finishAndRemoveTask()
-            }
-            .show()
-    }
-
-    private fun showFlashlightSettings() {
-        var flag = prefs.flashlightFlag
-        val values = FlashlightFlag.values()
-        MaterialAlertDialogBuilder(this)
-            .setMultiChoiceItems(
-                resources.getStringArray(R.array.flashlight_flag),
-                values.map { flag.and(it.value) != 0 }.toBooleanArray()
-            ) { _, index, isChecked ->
-                val value = values[index]
-                flag = when (isChecked) {
-                    true -> flag.or(value.value)
-                    false -> flag.and(value.value.inv())
-                }
-            }
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                prefs.flashlightFlag = flag
             }
             .show()
     }
