@@ -2,18 +2,13 @@ package me.lucky.volta
 
 import android.Manifest
 import android.accessibilityservice.AccessibilityService
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.os.*
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import java.lang.ref.WeakReference
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.timerTask
 
 class AccessibilityService : AccessibilityService() {
@@ -24,19 +19,18 @@ class AccessibilityService : AccessibilityService() {
     }
 
     private lateinit var prefs: Preferences
-    private lateinit var torchCallback: TorchCallback
+    private lateinit var torchManager: TorchManager
     private var audioManager: AudioManager? = null
-    private var cameraManager: CameraManager? = null
     private var vibrator: Vibrator? = null
     @RequiresApi(Build.VERSION_CODES.O)
     private var vibrationEffect: VibrationEffect? = null
     private var longDownTask: Timer? = null
     private var longUpTask: Timer? = null
     private var doubleUpTask: Timer? = null
-    private val longDownFlag = AtomicBoolean()
-    private val longUpFlag = AtomicBoolean()
-    private val doubleUpFlag = AtomicBoolean()
-    private val upTime = AtomicLong()
+    private var longDownFlag = false
+    private var longUpFlag = false
+    private var doubleUpFlag = false
+    private var upTime = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -52,31 +46,22 @@ class AccessibilityService : AccessibilityService() {
         longDownTask?.cancel()
         longUpTask?.cancel()
         doubleUpTask?.cancel()
-        cameraManager?.unregisterTorchCallback(torchCallback)
-        torchCallback.disableFlashlightTask?.cancel()
+        torchManager.deinit()
     }
 
     private fun init() {
         prefs = Preferences(this)
-        torchCallback = TorchCallback(WeakReference(this))
+        torchManager = TorchManager(this)
         audioManager = getSystemService(AudioManager::class.java)
-        cameraManager = getSystemService(CameraManager::class.java)
-        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             getSystemService(VibratorManager::class.java)?.defaultVibrator
-        } else {
+        else
             getSystemService(Vibrator::class.java)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             vibrationEffect = VibrationEffect.createOneShot(
                 VIBE_DURATION,
                 VibrationEffect.DEFAULT_AMPLITUDE,
             )
-        }
-        try {
-            cameraManager?.registerTorchCallback(torchCallback, null)
-        } catch (exc: IllegalArgumentException) {
-            cameraManager = null
-        }
     }
 
     @RequiresPermission(Manifest.permission.VIBRATE)
@@ -94,7 +79,7 @@ class AccessibilityService : AccessibilityService() {
 
     override fun onKeyEvent(event: KeyEvent?): Boolean {
         if (event == null ||
-            !prefs.isServiceEnabled ||
+            !prefs.isEnabled ||
             audioManager?.mode != AudioManager.MODE_NORMAL) return false
         val isMusicActive = audioManager?.isMusicActive == true
         if (prefs.isTrackChecked && isMusicActive)
@@ -115,15 +100,15 @@ class AccessibilityService : AccessibilityService() {
                 longDownTask?.cancel()
                 longDownTask = Timer()
                 longDownTask?.schedule(timerTask {
-                    longDownFlag.set(true)
+                    longDownFlag = true
                     dispatchMediaKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                    vibrate()
+                    if (prefs.trackOptions.and(TrackOption.VIBRATE.value) != 0) vibrate()
                 }, LONG_PRESS_DURATION)
                 return true
             }
             KeyEvent.ACTION_UP -> {
                 longDownTask?.cancel()
-                if (!longDownFlag.getAndSet(false)) volumeDown()
+                if (!longDownFlag) volumeDown() else longDownFlag = false
                 return true
             }
         }
@@ -163,15 +148,15 @@ class AccessibilityService : AccessibilityService() {
                 longUpTask?.cancel()
                 longUpTask = Timer()
                 longUpTask?.schedule(timerTask {
-                    longUpFlag.set(true)
+                    longUpFlag = true
                     dispatchMediaKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT)
-                    vibrate()
+                    if (prefs.trackOptions.and(TrackOption.VIBRATE.value) != 0) vibrate()
                 }, LONG_PRESS_DURATION)
                 return true
             }
             KeyEvent.ACTION_UP -> {
                 longUpTask?.cancel()
-                if (!longUpFlag.getAndSet(false)) volumeUp()
+                if (!longUpFlag) volumeUp() else longUpFlag = false
                 return true
             }
         }
@@ -181,70 +166,23 @@ class AccessibilityService : AccessibilityService() {
     private fun flashlight(event: KeyEvent): Boolean {
         when (event.action) {
             KeyEvent.ACTION_DOWN -> {
-                if (event.eventTime - upTime.getAndSet(event.eventTime) < DOUBLE_PRESS_DURATION) {
+                if (event.eventTime - upTime < DOUBLE_PRESS_DURATION) {
                     doubleUpTask?.cancel()
-                    doubleUpFlag.set(true)
-                    toggleFlashlight()
-                    vibrate()
-                }
+                    doubleUpFlag = true
+                    torchManager.toggle()
+                    if (prefs.flashlightOptions.and(FlashlightOption.VIBRATE.value) != 0) vibrate()
+                } else { upTime = event.eventTime }
                 return true
             }
             KeyEvent.ACTION_UP -> {
-                if (!doubleUpFlag.getAndSet(false)) {
+                if (!doubleUpFlag) {
                     doubleUpTask?.cancel()
                     doubleUpTask = Timer()
                     doubleUpTask?.schedule(timerTask { volumeUp() }, DOUBLE_PRESS_DURATION)
-                }
+                } else { doubleUpFlag = false }
                 return true
             }
         }
         return false
-    }
-
-    private fun toggleFlashlight() {
-        val state = !torchCallback.state.get()
-        torchCallback.internalState.set(state)
-        if (!setTorchMode(state)) torchCallback.internalState.set(false)
-    }
-
-    @RequiresPermission("android.permission.FLASHLIGHT")
-    private fun setTorchMode(value: Boolean): Boolean {
-        try {
-            cameraManager?.setTorchMode(
-                cameraManager
-                    ?.cameraIdList
-                    ?.firstOrNull {
-                        cameraManager
-                            ?.getCameraCharacteristics(it)
-                            ?.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ?: false
-                    } ?: return false,
-                value,
-            )
-        } catch (exc: Exception) { return false }
-        return true
-    }
-
-    private class TorchCallback(
-        private val service: WeakReference<me.lucky.volta.AccessibilityService>,
-    ) : CameraManager.TorchCallback() {
-        companion object {
-            private const val DISABLE_FLASHLIGHT_DELAY = 15 * 60 * 1000L
-        }
-
-        val state = AtomicBoolean()
-        val internalState = AtomicBoolean()
-        var disableFlashlightTask: Timer? = null
-
-        override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
-            super.onTorchModeChanged(cameraId, enabled)
-            disableFlashlightTask?.cancel()
-            state.set(enabled)
-            if (internalState.getAndSet(false) && enabled) {
-                disableFlashlightTask = Timer()
-                disableFlashlightTask?.schedule(timerTask {
-                    service.get()?.setTorchMode(false)
-                }, DISABLE_FLASHLIGHT_DELAY)
-            }
-        }
     }
 }

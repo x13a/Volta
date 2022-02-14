@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
             track.isChecked = prefs.isTrackChecked
             flashlight.isChecked = prefs.isFlashlightChecked
-            toggle.isChecked = prefs.isServiceEnabled
+            toggle.isChecked = prefs.isEnabled
         }
     }
 
@@ -56,15 +56,65 @@ class MainActivity : AppCompatActivity() {
             track.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isTrackChecked = isChecked
             }
+            track.setOnLongClickListener {
+                showTrackOptions()
+                true
+            }
             flashlight.setOnCheckedChangeListener { _, isChecked ->
                 prefs.isFlashlightChecked = isChecked
             }
+            flashlight.setOnLongClickListener {
+                showFlashlightOptions()
+                true
+            }
             toggle.setOnCheckedChangeListener { _, isChecked ->
-                prefs.isServiceEnabled = isChecked
+                prefs.isEnabled = isChecked
                 if (isChecked && !hasPermissions())
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }
         }
+    }
+
+    private fun showTrackOptions() {
+        var options = prefs.trackOptions
+        val values = TrackOption.values()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.track)
+            .setMultiChoiceItems(
+                resources.getStringArray(R.array.track_options),
+                values.map { options.and(it.value) != 0 }.toBooleanArray()
+            ) { _, index, isChecked ->
+                val flag = values[index]
+                options = when (isChecked) {
+                    true -> options.or(flag.value)
+                    false -> options.and(flag.value.inv())
+                }
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                prefs.trackOptions = options
+            }
+            .show()
+    }
+
+    private fun showFlashlightOptions() {
+        var options = prefs.flashlightOptions
+        val values = TrackOption.values()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.flashlight)
+            .setMultiChoiceItems(
+                resources.getStringArray(R.array.flashlight_options),
+                values.map { options.and(it.value) != 0 }.toBooleanArray()
+            ) { _, index, isChecked ->
+                val flag = values[index]
+                options = when (isChecked) {
+                    true -> options.or(flag.value)
+                    false -> options.and(flag.value.inv())
+                }
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                prefs.flashlightOptions = options
+            }
+            .show()
     }
 
     private fun showProminentDisclosure() {
@@ -91,7 +141,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun update() {
-        if (prefs.isServiceEnabled && !hasPermissions())
+        if (prefs.isEnabled && !hasPermissions())
             Snackbar.make(
                 binding.toggle,
                 R.string.service_unavailable_popup,
