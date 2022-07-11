@@ -3,7 +3,8 @@ Tiny app to add several actions to volume buttons.
 Actions:
 * Long Volume Up - next track
 * Long Volume Down - previous track
-* Double Volume Up - flashlight
+* Double Volume Up - flashlight/broadcast
+* Double Volume Down - flashlight/broadcast
 
 Does NOT work when the screen is fully off. For a better user experience use Key Mapper.
 

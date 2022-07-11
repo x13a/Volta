@@ -10,8 +10,8 @@ android {
         applicationId "me.lucky.volta"
         minSdk 23
         targetSdk 32
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,4 +48,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation 'androidx.drawerlayout:drawerlayout:1.1.1'
 }

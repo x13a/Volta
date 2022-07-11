@@ -1,4 +1,4 @@
-package me.lucky.volta
+package me.lucky.volta.core
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
@@ -13,11 +13,8 @@ class TorchManager(ctx: Context) {
     private var cameraManager: CameraManager? = ctx.getSystemService(CameraManager::class.java)
 
     init {
-        try {
-            cameraManager?.registerTorchCallback(torchCallback, null)
-        } catch (exc: IllegalArgumentException) {
-            cameraManager = null
-        }
+        try { cameraManager?.registerTorchCallback(torchCallback, null) }
+        catch (exc: IllegalArgumentException) { cameraManager = null }
     }
 
     fun deinit() {

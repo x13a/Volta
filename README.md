@@ -1,6 +1,6 @@
 # Volta
 
-Additional actions on volume buttons.
+Actions on volume buttons.
 
 [<img
      src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
@@ -19,9 +19,10 @@ Additional actions on volume buttons.
 Tiny app to add several actions to volume buttons.
 
 Actions:
-* Long   Volume Up   - next track
-* Long   Volume Down - previous track
-* Double Volume Up   - flashlight
+* Long Volume Up - next track
+* Long Volume Down - previous track
+* Double Volume Up - flashlight/broadcast
+* Double Volume Down - flashlight/broadcast
 
 Does NOT work when the screen is fully off. For a better user experience use 
 [Key Mapper](https://github.com/sds100/KeyMapper).
@@ -29,8 +30,8 @@ Does NOT work when the screen is fully off. For a better user experience use
 ## Permissions
 
 * ACCESSIBILITY - receive volume key events
-* VIBRATE       - notify on action success
-* FLASHLIGHT    - toggle flashlight
+* VIBRATE - notify on action success
+* FLASHLIGHT - toggle flashlight
 
 ## License
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)

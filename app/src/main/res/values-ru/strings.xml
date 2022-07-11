@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Volta</string>
-    <string name="description">Приложение может добавить несколько действий на кнопки регулировки громкости. Вы должны выдать разрешение на использование службы доступности.</string>
     <string name="service_unavailable_popup">Служба доступности недоступна</string>
     <string name="track">Трек</string>
     <string name="track_description">Долгое нажатие Громкость Вверх/Вниз</string>
-    <string name="track_options_array_vibrate">Вибрация</string>
     <string name="flashlight">Фонарик</string>
-    <string name="flashlight_description">Двойное нажатие Громкость Вверх</string>
-    <string name="flashlight_options_array_vibrate">Вибрация</string>
+    <string name="double_up_description">Двойное нажатие Громкость Вверх</string>
     <string name="prominent_disclosure_title">Раскрытие Информации</string>
     <string name="prominent_disclosure_message">Приложение использует службу доступности, чтобы получать события нажатий на кнопки громкости. Используя их, оно может добавить возможность переключать треки и/или переключать фонарик.</string>
     <string name="accept">Принять</string>

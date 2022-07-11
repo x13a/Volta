@@ -1,7 +1,8 @@
-package me.lucky.volta
+package me.lucky.volta.core
 
 import android.Manifest
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import android.media.AudioManager
 import android.os.*
 import android.view.KeyEvent
@@ -10,6 +11,10 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import java.util.*
 import kotlin.concurrent.timerTask
+
+import me.lucky.volta.Option
+import me.lucky.volta.Mode
+import me.lucky.volta.Preferences
 
 class AccessibilityService : AccessibilityService() {
     companion object {
@@ -27,10 +32,13 @@ class AccessibilityService : AccessibilityService() {
     private var longDownTask: Timer? = null
     private var longUpTask: Timer? = null
     private var doubleUpTask: Timer? = null
+    private var doubleDownTask: Timer? = null
     private var longDownFlag = false
     private var longUpFlag = false
     private var doubleUpFlag = false
-    private var upTime = 0L
+    private var doubleDownFlag = false
+    private var doubleUpTime = 0L
+    private var doubleDownTime = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -46,6 +54,7 @@ class AccessibilityService : AccessibilityService() {
         longDownTask?.cancel()
         longUpTask?.cancel()
         doubleUpTask?.cancel()
+        doubleDownTask?.cancel()
         torchManager.deinit()
     }
 
@@ -81,16 +90,17 @@ class AccessibilityService : AccessibilityService() {
         if (event == null ||
             !prefs.isEnabled ||
             audioManager?.mode != AudioManager.MODE_NORMAL) return false
-        val isMusicActive = audioManager?.isMusicActive == true
-        if (prefs.isTrackChecked && isMusicActive)
-            when (event.keyCode) {
-                KeyEvent.KEYCODE_VOLUME_DOWN -> return previousTrack(event)
-                KeyEvent.KEYCODE_VOLUME_UP -> return nextTrack(event)
-            }
-        else if (
-            prefs.isFlashlightChecked &&
-            !isMusicActive &&
-            event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) return flashlight(event)
+        if (audioManager?.isMusicActive == true) {
+            if (prefs.isTrackChecked)
+                when (event.keyCode) {
+                    KeyEvent.KEYCODE_VOLUME_DOWN -> return previousTrack(event)
+                    KeyEvent.KEYCODE_VOLUME_UP -> return nextTrack(event)
+                }
+        } else if (prefs.isDoubleDownChecked && event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            return doubleDown(event)
+        } else if (prefs.isDoubleUpChecked && event.keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            return doubleUp(event)
+        }
         return super.onKeyEvent(event)
     }
 
@@ -102,7 +112,7 @@ class AccessibilityService : AccessibilityService() {
                 longDownTask?.schedule(timerTask {
                     longDownFlag = true
                     dispatchMediaKeyEvent(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                    if (prefs.trackOptions.and(TrackOption.VIBRATE.value) != 0) vibrate()
+                    if (prefs.trackOptions.and(Option.VIBRATE.value) != 0) vibrate()
                 }, LONG_PRESS_DURATION)
                 return true
             }
@@ -150,7 +160,7 @@ class AccessibilityService : AccessibilityService() {
                 longUpTask?.schedule(timerTask {
                     longUpFlag = true
                     dispatchMediaKeyEvent(KeyEvent.KEYCODE_MEDIA_NEXT)
-                    if (prefs.trackOptions.and(TrackOption.VIBRATE.value) != 0) vibrate()
+                    if (prefs.trackOptions.and(Option.VIBRATE.value) != 0) vibrate()
                 }, LONG_PRESS_DURATION)
                 return true
             }
@@ -163,15 +173,15 @@ class AccessibilityService : AccessibilityService() {
         return false
     }
 
-    private fun flashlight(event: KeyEvent): Boolean {
+    private fun doubleUp(event: KeyEvent): Boolean {
         when (event.action) {
             KeyEvent.ACTION_DOWN -> {
-                if (event.eventTime - upTime < DOUBLE_PRESS_DURATION) {
+                if (event.eventTime - doubleUpTime < DOUBLE_PRESS_DURATION) {
                     doubleUpTask?.cancel()
                     doubleUpFlag = true
-                    torchManager.toggle()
-                    if (prefs.flashlightOptions.and(FlashlightOption.VIBRATE.value) != 0) vibrate()
-                } else { upTime = event.eventTime }
+                    doubleSelect(prefs.doubleUpMode, 0)
+                    if (prefs.doubleUpOptions.and(Option.VIBRATE.value) != 0) vibrate()
+                } else { doubleUpTime = event.eventTime }
                 return true
             }
             KeyEvent.ACTION_UP -> {
@@ -185,4 +195,77 @@ class AccessibilityService : AccessibilityService() {
         }
         return false
     }
-}
+
+    private fun doubleDown(event: KeyEvent): Boolean {
+        when (event.action) {
+            KeyEvent.ACTION_DOWN -> {
+                if (event.eventTime - doubleDownTime < DOUBLE_PRESS_DURATION) {
+                    doubleDownTask?.cancel()
+                    doubleDownFlag = true
+                    doubleSelect(prefs.doubleDownMode, 1)
+                    if (prefs.doubleDownOptions.and(Option.VIBRATE.value) != 0) vibrate()
+                } else { doubleDownTime = event.eventTime }
+                return true
+            }
+            KeyEvent.ACTION_UP -> {
+                if (!doubleDownFlag) {
+                    doubleDownTask?.cancel()
+                    doubleDownTask = Timer()
+                    doubleDownTask?.schedule(timerTask { volumeDown() }, DOUBLE_PRESS_DURATION)
+                } else { doubleDownFlag = false }
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun doubleSelect(mode: Int, index: Int) = when (mode) {
+        Mode.FLASHLIGHT.value -> flashlight()
+        Mode.BROADCAST.value -> broadcast(index)
+        else -> {}
+    }
+
+    private fun flashlight() { torchManager.toggle() }
+
+    private fun broadcast(index: Int) {
+        val data = getBroadcastData(index)
+        if (data.action.isEmpty()) return
+        sendBroadcast(Intent(data.action).apply {
+            val cls = data.receiver.split('/')
+            val packageName = cls.firstOrNull() ?: ""
+            if (packageName.isNotEmpty()) {
+                setPackage(packageName)
+                if (cls.size == 2)
+                    setClassName(
+                        packageName,
+                        "$packageName.${cls[1].trimStart('.')}",
+                    )
+            }
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            if (data.key.isNotEmpty()) putExtra(data.key, data.value)
+        })
+    }
+
+    private fun getBroadcastData(index: Int) =
+        when (index) {
+            0 -> BroadcastData(
+                prefs.broadcast0Action,
+                prefs.broadcast0Receiver,
+                prefs.broadcast0Key,
+                prefs.broadcast0Value,
+            )
+            else -> BroadcastData(
+                prefs.broadcast1Action,
+                prefs.broadcast1Receiver,
+                prefs.broadcast1Key,
+                prefs.broadcast1Value,
+            )
+        }
+
+    private data class BroadcastData(
+        val action: String,
+        val receiver: String,
+        val key: String,
+        val value: String,
+    )
+ }

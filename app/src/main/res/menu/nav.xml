@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_main"
+        android:title="@string/main"
+        android:checkable="true"
+        android:checked="true" />
+
+    <group
+        android:id="@+id/nav_group_options"
+        android:checkableBehavior="all">
+
+        <item
+            android:id="@+id/nav_track"
+            android:title="@string/track" />
+
+        <item
+            android:id="@+id/nav_double_up"
+            android:title="@string/double_up" />
+
+        <item
+            android:id="@+id/nav_double_down"
+            android:title="@string/double_down" />
+
+    </group>
+
+</menu>
