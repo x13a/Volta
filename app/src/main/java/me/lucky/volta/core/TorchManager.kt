@@ -8,8 +8,10 @@ import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.concurrent.timerTask
 
+import me.lucky.volta.Preferences
+
 class TorchManager(ctx: Context) {
-    private val torchCallback = TorchCallback(WeakReference(this))
+    private val torchCallback = TorchCallback(WeakReference(this), Preferences(ctx))
     private var cameraManager: CameraManager? = ctx.getSystemService(CameraManager::class.java)
 
     init {
@@ -47,11 +49,8 @@ class TorchManager(ctx: Context) {
 
     private class TorchCallback(
         private val manager: WeakReference<TorchManager>,
+        private val prefs: Preferences,
     ) : CameraManager.TorchCallback() {
-        companion object {
-            private const val DISABLE_DELAY = 15 * 60 * 1000L
-        }
-
         var state = false
         var internal = false
         var disableTask: Timer? = null
@@ -65,7 +64,7 @@ class TorchManager(ctx: Context) {
             disableTask = Timer()
             disableTask?.schedule(timerTask {
                 manager.get()?.setTorchMode(false)
-            }, DISABLE_DELAY)
+            }, prefs.torchDisableDelay * 60 * 1000L)
         }
     }
 }

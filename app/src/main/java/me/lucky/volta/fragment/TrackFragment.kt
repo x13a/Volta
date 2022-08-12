@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 
 import me.lucky.volta.Option
@@ -33,12 +34,16 @@ class TrackFragment : Fragment() {
         prefs = Preferences(ctx)
         binding.apply {
             vibrate.isChecked = prefs.trackOptions.and(Option.VIBRATE.value) != 0
+            longPressDuration.editText?.setText(prefs.longPressDuration.toString())
         }
     }
 
     private fun setup() = binding.apply {
         vibrate.setOnCheckedChangeListener { _, isChecked ->
             prefs.trackOptions = Utils.setFlag(prefs.trackOptions, Option.VIBRATE.value, isChecked)
+        }
+        longPressDuration.editText?.doAfterTextChanged {
+            prefs.longPressDuration = it?.toString()?.toLongOrNull() ?: return@doAfterTextChanged
         }
     }
 }

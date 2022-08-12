@@ -38,10 +38,10 @@ class DoubleUpFragment : Fragment() {
                 Mode.BROADCAST.value -> R.id.broadcast
                 else -> R.id.flashlight
             })
-            action.editText?.setText(prefs.broadcast0Action)
-            receiver.editText?.setText(prefs.broadcast0Receiver)
-            key.editText?.setText(prefs.broadcast0Key)
-            value.editText?.setText(prefs.broadcast0Value)
+            action.editText?.setText(prefs.broadcastUpAction)
+            receiver.editText?.setText(prefs.broadcastUpReceiver)
+            extraKey.editText?.setText(prefs.broadcastUpExtraKey)
+            extraValue.editText?.setText(prefs.broadcastUpExtraValue)
         }
     }
 
@@ -59,16 +59,16 @@ class DoubleUpFragment : Fragment() {
             selectInterface()
         }
         action.editText?.doAfterTextChanged {
-            prefs.broadcast0Action = it?.toString()?.trim() ?: return@doAfterTextChanged
+            prefs.broadcastUpAction = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
         receiver.editText?.doAfterTextChanged {
-            prefs.broadcast0Receiver = it?.toString()?.trim() ?: return@doAfterTextChanged
+            prefs.broadcastUpReceiver = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
-        key.editText?.doAfterTextChanged {
-            prefs.broadcast0Key = it?.toString()?.trim() ?: return@doAfterTextChanged
+        extraKey.editText?.doAfterTextChanged {
+            prefs.broadcastUpExtraKey = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
-        value.editText?.doAfterTextChanged {
-            prefs.broadcast0Value = it?.toString()?.trim() ?: return@doAfterTextChanged
+        extraValue.editText?.doAfterTextChanged {
+            prefs.broadcastUpExtraValue = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
     }
 
@@ -81,8 +81,8 @@ class DoubleUpFragment : Fragment() {
         binding.apply {
             action.visibility = v
             receiver.visibility = v
-            key.visibility = v
-            value.visibility = v
+            extraKey.visibility = v
+            extraValue.visibility = v
             space1.visibility = v
             space2.visibility = v
             space3.visibility = v

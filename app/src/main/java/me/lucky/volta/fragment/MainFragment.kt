@@ -38,22 +38,22 @@ class MainFragment : Fragment() {
         prefs = Preferences(ctx)
         accessibilityManager = ctx.getSystemService(AccessibilityManager::class.java)
         binding.apply {
-            track.isChecked = prefs.isTrackChecked
-            doubleUp.isChecked = prefs.isDoubleUpChecked
-            doubleDown.isChecked = prefs.isDoubleDownChecked
+            track.isChecked = prefs.isTrackEnabled
+            doubleUp.isChecked = prefs.isDoubleUpEnabled
+            doubleDown.isChecked = prefs.isDoubleDownEnabled
             toggle.isChecked = prefs.isEnabled
         }
     }
 
     private fun setup() = binding.apply {
         track.setOnCheckedChangeListener { _, isChecked ->
-            prefs.isTrackChecked = isChecked
+            prefs.isTrackEnabled = isChecked
         }
         doubleUp.setOnCheckedChangeListener { _, isChecked ->
-            prefs.isDoubleUpChecked = isChecked
+            prefs.isDoubleUpEnabled = isChecked
         }
         doubleDown.setOnCheckedChangeListener { _, isChecked ->
-            prefs.isDoubleDownChecked = isChecked
+            prefs.isDoubleDownEnabled = isChecked
         }
         toggle.setOnCheckedChangeListener { _, isChecked ->
             prefs.isEnabled = isChecked

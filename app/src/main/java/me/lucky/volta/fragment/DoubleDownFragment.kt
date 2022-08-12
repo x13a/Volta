@@ -38,10 +38,10 @@ class DoubleDownFragment : Fragment() {
                 Mode.BROADCAST.value -> R.id.broadcast
                 else -> R.id.flashlight
             })
-            action.editText?.setText(prefs.broadcast1Action)
-            receiver.editText?.setText(prefs.broadcast1Receiver)
-            key.editText?.setText(prefs.broadcast1Key)
-            value.editText?.setText(prefs.broadcast1Value)
+            action.editText?.setText(prefs.broadcastDownAction)
+            receiver.editText?.setText(prefs.broadcastDownReceiver)
+            extraKey.editText?.setText(prefs.broadcastDownExtraKey)
+            extraValue.editText?.setText(prefs.broadcastDownExtraValue)
         }
     }
 
@@ -59,16 +59,16 @@ class DoubleDownFragment : Fragment() {
             selectInterface()
         }
         action.editText?.doAfterTextChanged {
-            prefs.broadcast1Action = it?.toString()?.trim() ?: return@doAfterTextChanged
+            prefs.broadcastDownAction = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
         receiver.editText?.doAfterTextChanged {
-            prefs.broadcast1Receiver = it?.toString()?.trim() ?: return@doAfterTextChanged
+            prefs.broadcastDownReceiver = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
-        key.editText?.doAfterTextChanged {
-            prefs.broadcast1Key = it?.toString()?.trim() ?: return@doAfterTextChanged
+        extraKey.editText?.doAfterTextChanged {
+            prefs.broadcastDownExtraKey = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
-        value.editText?.doAfterTextChanged {
-            prefs.broadcast1Value = it?.toString()?.trim() ?: return@doAfterTextChanged
+        extraValue.editText?.doAfterTextChanged {
+            prefs.broadcastDownExtraValue = it?.toString()?.trim() ?: return@doAfterTextChanged
         }
     }
 
@@ -81,8 +81,8 @@ class DoubleDownFragment : Fragment() {
         binding.apply {
             action.visibility = v
             receiver.visibility = v
-            key.visibility = v
-            value.visibility = v
+            extraKey.visibility = v
+            extraValue.visibility = v
             space1.visibility = v
             space2.visibility = v
             space3.visibility = v

@@ -39,17 +39,17 @@
                 android:layout_marginVertical="10dp"
                 android:background="?android:attr/listDivider" />
 
-            <TextView
-                android:textAppearance="?attr/textAppearanceBodyLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/mode" />
-
             <RadioGroup
                 android:id="@+id/mode"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+                <TextView
+                    android:textAppearance="?attr/textAppearanceBodyLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mode" />
 
                 <RadioButton
                     android:id="@+id/flashlight"
@@ -104,10 +104,10 @@
                 android:layout_marginVertical="5dp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/key"
+                android:id="@+id/extraKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/key">
+                android:hint="@string/extra_key">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -122,10 +122,10 @@
                 android:layout_marginVertical="5dp" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/value"
+                android:id="@+id/extraValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/value">
+                android:hint="@string/extra_value">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"

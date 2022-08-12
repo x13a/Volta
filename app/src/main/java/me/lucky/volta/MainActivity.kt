@@ -30,6 +30,19 @@ class MainActivity : AppCompatActivity() {
         appBar.setNavigationOnClickListener {
             drawer.open()
         }
+        appBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.top_settings -> {
+                    replaceFragment(when (supportFragmentManager.fragments.last()) {
+                        is SettingsFragment ->
+                            getFragment(navigation.checkedItem?.itemId ?: R.id.nav_main)
+                        else -> SettingsFragment()
+                    })
+                    true
+                }
+                else -> false
+            }
+        }
         navigation.setNavigationItemSelectedListener {
             replaceFragment(getFragment(it.itemId))
             it.isChecked = true

@@ -20,6 +20,11 @@
     <string name="vibrate_description">Vibrate on action complete.</string>
     <string name="action">action*</string>
     <string name="receiver">receiver</string>
-    <string name="key">key</string>
-    <string name="value">value</string>
+    <string name="extra_key">extra key</string>
+    <string name="extra_value">extra value</string>
+    <string name="settings">Settings</string>
+    <string name="track_long_press_duration_hint">long press duration</string>
+    <string name="settings_double_press_duration_hint">double press duration</string>
+    <string name="settings_vibe_duration_hint">vibe duration</string>
+    <string name="settings_torch_disable_delay_hint">flashlight disable minutes</string>
 </resources>

@@ -3,4 +3,5 @@
     android:description="@string/prominent_disclosure_message"
     android:accessibilityFlags="flagRequestFilterKeyEvents"
     android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="100"
     android:canRequestFilterKeyEvents="true" />
