@@ -6,7 +6,8 @@ Actions:
 * Double Volume Up - flashlight/broadcast
 * Double Volume Down - flashlight/broadcast
 
-Does NOT work when the screen is fully off. For a better user experience use Key Mapper.
+Does NOT work when the screen is fully off.
+For a better user experience use Key Mapper.
 
 Permissions:
 * ACCESSIBILITY - receive volume key events

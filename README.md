@@ -18,8 +18,8 @@ Actions on volume buttons.
 
 Tiny app to add several actions to volume buttons.
 
-Does NOT work when the screen is fully off. For a better user experience use 
-[Key Mapper](https://github.com/sds100/KeyMapper).
+Does NOT work when the screen is fully off.  
+For a better user experience use [Key Mapper](https://github.com/sds100/KeyMapper).
 
 ## Actions
 
