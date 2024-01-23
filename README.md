@@ -1,5 +1,9 @@
 # Volta
 
+**Deprecated! Use [Key Mapper](https://github.com/sds100/KeyMapper)**
+
+---
+
 Actions on volume buttons.
 
 [<img
